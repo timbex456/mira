@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mira gift</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #0e0518 0%, #030107 100%);
+            font-family: 'Cairo', sans-serif;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100vw;
+            overflow-x: hidden;
+            overflow-y: auto;
+            perspective: 1200px;
+            padding: 15px;
+        }
+
+        .bg-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, rgba(74, 20, 140, 0.2), rgba(30, 5, 60, 0.1));
+            filter: blur(100px);
+            border-radius: 50%;
+            z-index: 1;
+            animation: floatGlow 12s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        .bg-glow.two {
+            top: 5%;
+            right: 5%;
+            background: linear-gradient(135deg, rgba(92, 38, 141, 0.15), rgba(15, 2, 30, 0.08));
+            animation-delay: -6s;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-20px, -20px) scale(1.1); }
+        }
+
+        #backgroundBubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg-bubble {
+            position: absolute;
+            bottom: -60px;
+            background: radial-gradient(circle at 30% 30%, rgba(184, 146, 255, 0.35), rgba(74, 20, 140, 0.1));
+            border: 1px solid rgba(184, 146, 255, 0.25);
+            box-shadow: 0 0 12px rgba(184, 146, 255, 0.2);
+            border-radius: 50%;
+            animation: riseBubble linear infinite;
+        }
+
+        @keyframes riseBubble {
+            0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+            15% { opacity: 0.8; }
+            85% { opacity: 0.8; }
+            100% { transform: translateY(-110vh) translateX(30px) scale(1.15); opacity: 0; }
+        }
+
+        .bg-music-control {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(15, 7, 28, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(128, 70, 200, 0.3);
+            color: #c4b5fd;
+            padding: 8px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            z-index: 999;
+            font-family: 'Cairo', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .bg-music-control:hover {
+            background: rgba(45, 20, 75, 0.9);
+            border-color: rgba(184, 146, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .bg-music-control:active {
+            transform: scale(0.93);
+        }
+
+        .luxury-card {
+            background: rgba(15, 7, 28, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(184, 146, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(180, 120, 255, 0.3);
+            padding: 30px 20px;
+            border-radius: 28px;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out, opacity 0.4s ease, visibility 0.4s ease;
+            will-change: transform;
+        }
+
+        .luxury-card.hidden-card {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .step {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px) translateZ(10px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .step.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) translateZ(10px);
+        }
+
+        h2 {
+            background: linear-gradient(135deg, #fff 20%, #b892ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            font-size: 13px;
+            line-height: 1.7;
+            color: #c4b5fd;
+            margin-bottom: 18px;
+            font-weight: 300;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #5e17eb 0%, #8a2be2 100%);
+            border: 1px solid rgba(216, 180, 254, 0.3);
+            padding: 13px 18px;
+            border-radius: 16px;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(94, 23, 235, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            width: 100%;
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            z-index: 20;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        /* تفاعل الأزرار عند مرور الماوس */
+        .btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(120, 40, 255, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: scale(0.94);
+            box-shadow: 0 3px 10px rgba(94, 23, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            filter: brightness(0.9);
+        }
+
+        .pass-input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(128, 70, 200, 0.3);
+            background: rgba(8, 3, 15, 0.6);
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            font-family: 'Cairo', sans-serif;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .pass-input:focus, textarea:focus {
+            border-color: rgba(184, 146, 255, 0.8);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(138, 43, 226, 0.4);
+        }
+
+        .pass-input { text-align: center; letter-spacing: 4px; }
+        textarea { resize: none; height: 90px; text-align: right; }
+
+        #fullscreen-balloons-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+            overflow: hidden;
+        }
+
+        #fullscreen-balloons-container.active { display: block; }
+
+        .real-balloon {
+            position: absolute;
+            width: 45px; height: 58px;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: inset -6px -6px 0px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(74, 20, 140, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            animation: floatBalloon 4s ease-in-out infinite alternate;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+        }
+
+        .real-balloon:hover {
+            transform: scale(1.15) rotate(5deg);
+            filter: brightness(1.2);
+        }
+
+        .real-balloon:active {
+            transform: scale(0.8);
+        }
+
+        .real-balloon::after {
+            content: "";
+            position: absolute; bottom: -7px; left: 50%;
+            transform: translateX(-50%); width: 2px; height: 12px;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes floatBalloon {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-20px) rotate(3deg); }
+        }
+
+        .real-balloon.popped {
+            transform: scale(0) rotate(45deg);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #congrats-popup {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            background: rgba(18, 8, 32, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(157, 78, 221, 0.4);
+            box-shadow: 0 0 40px rgba(74, 20, 140, 0.7);
+            padding: 20px 25px;
+            border-radius: 24px;
+            z-index: 200;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            width: 85%;
+            max-width: 320px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #congrats-popup.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        #congrats-popup h1 { font-size: 18px; }
+
+        .glass-fullscreen-msg, .glass-memories-screen, .glass-webhook-screen {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            background: rgba(15, 7, 28, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(184, 146, 255, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255,255,255,0.15);
+            padding: 24px 20px;
+            border-radius: 28px;
+            max-width: 440px;
+            width: 94%;
+            z-index: 150;
+            text-align: center;
+            display: none;
+            opacity: 0;
+            max-height: 90vh;
+            overflow-y: auto;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-style: preserve-3d;
+        }
+
+        .glass-fullscreen-msg.active, .glass-memories-screen.active, .glass-webhook-screen.active {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .glass-msg-content {
+            max-height: 180px;
+            overflow-y: auto;
+            text-align: right;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.9;
+            color: #e2d9fc;
+        }
+
+        /* --- تعديل وتطوير شكل عرض الذكريات الجديد --- */
+        .memory-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 18px;
+            text-align: right;
+            background: rgba(25, 12, 45, 0.4);
+            border: 1px solid rgba(184, 146, 255, 0.15);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .memory-img-wrapper {
+            width: 100%;
+            height: 200px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(184, 146, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .memory-img-wrapper:hover {
+            transform: scale(1.01);
+            border-color: rgba(184, 146, 255, 0.6);
+        }
+
+        .memory-img {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: blur(15px) scale(1.1); opacity: 0;
+            transition: filter 1s ease, opacity 0.8s ease, transform 0.4s ease;
+        }
+        .memory-img.loaded { filter: blur(0px) scale(1); opacity: 1; }
+        .memory-img-wrapper:hover .memory-img { transform: scale(1.05); }
+
+        .zoom-hint-btn {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(15, 7, 28, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(184, 146, 255, 0.4);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-family: 'Cairo', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        #imageLightbox {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(3, 1, 7, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        #imageLightbox.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #lightboxImg {
+            max-width: 92vw;
+            max-height: 75vh;
+            object-fit: contain;
+            border-radius: 16px;
+            border: 1px solid rgba(184, 146, 255, 0.3);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #imageLightbox.active #lightboxImg {
+            transform: scale(1);
+        }
+
+        .close-lightbox {
+            margin-top: 20px;
+            background: linear-gradient(135deg, #5e17eb 0%, #8a2be2 100%);
+            border: 1px solid rgba(216, 180, 254, 0.3);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(94, 23, 235, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .close-lightbox:hover {
+            transform: scale(1.05);
+        }
+
+        .close-lightbox:active {
+            transform: scale(0.93);
+        }
+
+        .memory-text-wrapper { width: 100%; display: flex; flex-direction: column; justify-content: center; }
+
+        .memory-text-content {
+            font-size: 14px; line-height: 1.8; color: #f3f0ff;
+            background: rgba(184, 146, 255, 0.08);
+            border: 1px solid rgba(184, 146, 255, 0.25);
+            padding: 14px; border-radius: 14px;
+            transform: translateY(15px); opacity: 0;
+            transition: all 0.5s ease 0.15s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            font-weight: 600;
+        }
+        .memory-text-content.loaded { transform: translateY(0); opacity: 1; }
+
+        .music-player-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(128, 70, 200, 0.2);
+            padding: 12px; border-radius: 14px;
+            display: flex; flex-direction: column; gap: 10px;
+            width: 100%; justify-content: center;
+        }
+
+        .player-info { display: flex; align-items: center; gap: 10px; }
+        .player-cover { width: 45px; height: 45px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(128, 70, 200, 0.4); }
+        .player-details { text-align: right; display: flex; flex-direction: column; gap: 3px; }
+        .player-title { font-size: 13px; font-weight: 700; color: #fff; }
+        .player-artist { font-size: 11px; color: #c4b5fd; }
+        .player-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .play-pause-btn {
+            background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%);
+            border: none; width: 34px; height: 34px; border-radius: 50%;
+            color: white; font-size: 13px; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(74, 20, 140, 0.5);
+            transition: transform 0.1s;
+        }
+        .play-pause-btn:hover { transform: scale(1.1); }
+        .play-pause-btn:active { transform: scale(0.9); }
+        .progress-container { flex: 1; background: rgba(255, 255, 255, 0.1); height: 5px; border-radius: 10px; cursor: pointer; position: relative; overflow: hidden; }
+        .progress-bar { background: linear-gradient(90deg, #4a148c, #9c27b0); height: 100%; width: 0%; border-radius: 10px; transition: width 0.1s linear; }
+
+        .error { color: #ff6b6b; font-size: 12px; margin-top: 8px; font-weight: 600; }
+        .status-msg { margin-top: 8px; font-size: 12px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow"></div>
+    <div class="bg-glow two"></div>
+
+    <div id="backgroundBubbles"></div>
+
+    <div id="imageLightbox" onclick="closeLightbox()">
+        <img id="lightboxImg" src="" alt="صورة مكبرة">
+        <button type="button" class="close-lightbox" onclick="closeLightbox()">إغلاق ✕</button>
+    </div>
+
+    <audio id="bgMusic" src="background-music.mp3" loop></audio>
+    <button type="button" class="bg-music-control" id="bgMusicBtn" onclick="toggleBackgroundMusic()">
+        🎵 <span id="bgMusicText">موسيقى الخلفية: كتم</span>
+    </button>
+
+    <div id="fullscreen-balloons-container"></div>
+
+    <div id="congrats-popup">
+        <h1 id="popup-text">شاطره !!</h1>
+    </div>
+
+    <div class="glass-fullscreen-msg" id="glassMessageScreen">
+        <h2>رساله صغيره الج</h2>
+        <div class="glass-msg-content">
+            هنا تحط الرسالة الطويلة والكبيرة اللي بخاطرك.. اكتب براحتك وكثر كلام جميل وعميق، لأن هذا الإطار الزجاجي المستقل مخصص بالكامل للرسالة الأساسية بتصميم فاخر وشفاف. ✨
+        </div>
+        <button type="button" class="btn" onclick="playTransitionSound(); goToStep(5)">خلي نشوف شوي من ذكرياتنا</button>
+    </div>
+
+    <div class="glass-memories-screen" id="glassMemoriesScreen">
+        <h2>ذكرياتنا الجميلة 💜</h2>
+        <div class="memory-layout">
+            <div class="memory-img-wrapper" id="memoryDisplayArea"></div>
+            <div class="memory-text-wrapper">
+                <div id="activeMemoryText" class="memory-text-content"></div>
+            </div>
+        </div>
+        <button type="button" class="btn" id="next-memory-btn" onclick="playTransitionSound(); nextMemory()">الذكرى التالية</button>
+    </div>
+
+    <div class="glass-webhook-screen" id="glassWebhookScreen">
+        <h2>خلي كلمة بدك تقوليها</h2>
+        <p>اكتبي اي شي بخاطرك تبين تقوليه ورح توصلني 💜</p>
+        <form id="webhookForm">
+            <textarea id="messageContent" placeholder="اكتب رسالتك هنا..." required></textarea>
+            <button type="submit" class="btn" id="sendWebhookBtn">ارسال</button>
+        </form>
+        <div id="webhookStatus" class="status-msg"></div>
+        <button type="button" class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(128,70,200,0.3); margin-top: 8px;" onclick="closeWebhookScreen()">العودة للخلف ↩</button>
+    </div>
+
+    <div class="luxury-card" id="luxuryCard">
+        <div class="step active" id="step-1">
+            <h2>هديتج مسكره... </h2>
+            <p>بس يجي يوم ميلادج وتنفتح 💜..</p>
+            <div id="timer" style="font-size: 16px; color: #b892ff; font-weight: 700; margin: 10px 0;">جارٍ التحميل...</div>
+            <button type="button" class="btn" onclick="playTransitionSound(); forceUnlock()">دخول تجريبي سريع ⚡</button>
+        </div>
+
+        <div class="step" id="step-2">
+            <h2>خلنا نتحقق انج ميرا</h2>
+            <p>حطي الباسوورد يلي عطيتج ياه</p>
+            <input type="password" id="passcode" class="pass-input" placeholder="••••" maxlength="6">
+            <button type="button" class="btn" onclick="playTransitionSound(); checkCode()">تأكيد..</button>
+            <div id="error-msg" class="error"></div>
+        </div>
+
+        <div class="step" id="step-6">
+            <h2>كل عام وانتي بالف الفف خير 💙🌻</h2>
+            <p style="background: rgba(20, 10, 35, 0.4); padding: 12px; border-radius: 12px; border: 1px solid rgba(128, 70, 200, 0.2); font-style: italic;">
+                "أتممتِ 16 عاماً من الجمال، وصُممت هذه الرحلة الرقمية خصيصاً لتيبقى ذكرى خالدة تليق بأجمل الأوقات."
+            </p>
+            <a href="ضع_الرابط_هنا.ext" download class="btn" onclick="playTransitionSound(); triggerMegaConfetti()">تحميل الرسالة</a>
+            <button type="button" class="btn" style="background: linear-gradient(135deg, #1f1135 0%, #4a148c 100%); border: 1px solid rgba(157, 78, 221, 0.4);" onclick="playTransitionSound(); openWebhookScreen()">اكتب رسالة وتوصلني 📬</button>
+        </div>
+    </div>
+
+    <script>
+        const secretCode = "2026"; 
+        let poppedCount = 0;
+        const totalBalloons = 16;
+        let isUnlocked = false;
+
+        const bgMusic = document.getElementById('bgMusic');
+        const bgMusicBtn = document.getElementById('bgMusicBtn');
+        const bgMusicText = document.getElementById('bgMusicText');
+        let wasBgMusicPlaying = false; 
+
+        bgMusic.volume = 0.3; 
+
+        window.addEventListener('click', function startAudioOnce() {
+            if (bgMusic.paused && bgMusic.currentTime === 0) {
+                bgMusic.play().then(() => {
+                    bgMusicText.innerText = "موسيقى الخلفية: شغال 🎵";
+                }).catch(e => {});
+            }
+        }, { once: true });
+
+        function toggleBackgroundMusic() {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                bgMusicText.innerText = "موسيقى الخلفية: شغال 🎵";
+            } else {
+                bgMusic.pause();
+                bgMusicText.innerText = "موسيقى الخلفية: متوقف";
+            }
+        }
+
+        function initBackgroundBubbles() {
+            const container = document.getElementById('backgroundBubbles');
+            const bubbleCount = 15; 
+
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bg-bubble';
+                const size = Math.random() * 25 + 8; 
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.animationDuration = `${Math.random() * 6 + 4}s`; 
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(bubble);
+            }
+        }
+        initBackgroundBubbles();
+
+        /* --- تفعيل حركة النوافذ مع الماوس أو الجيروسكوب --- */
+        const activeCards = document.querySelectorAll('.luxury-card, .glass-fullscreen-msg, .glass-memories-screen, .glass-webhook-screen');
+
+        function handleCardTilt(e, card) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const xc = rect.width / 2;
+            const yc = rect.height / 2;
+            const dx = (x - xc) / xc;
+            const dy = (y - yc) / yc;
+            
+            card.style.transform = `translate(-50%, -50%) rotateY(${dx * 8}deg) rotateX(${-dy * 8}deg) translateZ(10px)`;
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            activeCards.forEach(card => {
+                if (card.style.display !== 'none' && card.classList.contains('active') || card.id === 'luxuryCard' && !card.classList.contains('hidden-card')) {
+                    if(card.id === 'luxuryCard') {
+                        const rect = card.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        const xc = rect.width / 2;
+                        const yc = rect.height / 2;
+                        const dx = (x - xc) / xc;
+                        const dy = (y - yc) / yc;
+                        card.style.transform = `rotateY(${dx * 8}deg) rotateX(${-dy * 8}deg) translateZ(10px)`;
+                    } else {
+                        handleCardTilt(e, card);
+                    }
+                }
+            });
+        });
+
+        // حركة الجيروسكوب لأجهزة الجوال
+        window.addEventListener('deviceorientation', (e) => {
+            if (e.beta !== null && e.gamma !== null) {
+                const tiltX = e.gamma / 3; // يمين ويسار
+                const tiltY = e.beta / 3;  // فوق وتحت
+                activeCards.forEach(card => {
+                    if (card.style.display !== 'none' && (card.classList.contains('active') || card.id === 'luxuryCard' && !card.classList.contains('hidden-card'))) {
+                        if(card.id === 'luxuryCard') {
+                            card.style.transform = `rotateY(${tiltX}deg) rotateX(${-tiltY}deg) translateZ(10px)`;
+                        } else {
+                            card.style.transform = `translate(-50%, -50%) rotateY(${tiltX}deg) rotateX(${-tiltY}deg) translateZ(10px)`;
+                        }
+                    }
+                });
+            }
+        });
+        /* ----------------------------------------------- */
+
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1542233335496048831/eVZwNBsfpS-vi5HRQknz6sG5xepBOBnTk7pxT9lbWZTKNTX3PxYP7Jeav3QoFu33z3T7";
+        const luxuryCard = document.getElementById('luxuryCard');
+
+        function playTransitionSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e) {}
+        }
+
+        function playPopSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.08);
+                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            } catch(e) {}
+        }
+
+        const glassMsgScreen = document.getElementById('glassMessageScreen');
+        const glassMemoriesScreen = document.getElementById('glassMemoriesScreen');
+        const glassWebhookScreen = document.getElementById('glassWebhookScreen');
+
+        const targetDate = new Date("2026-10-01T00:00:00");
+
+        function updateTimer() {
+            if (isUnlocked) return;
+            const now = new Date();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                isUnlocked = true;
+                goToStep(2);
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            const timerEl = document.getElementById('timer');
+            if(timerEl) timerEl.innerHTML = `${days}يوم : ${hours}س : ${mins}د : ${secs}ث`;
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        function forceUnlock() {
+            isUnlocked = true;
+            goToStep(2);
+        }
+
+        function goToStep(stepNum) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            const balloonsContainer = document.getElementById('fullscreen-balloons-container');
+            const mainCard = document.getElementById('luxuryCard');
+            const glassMsg = document.getElementById('glassMessageScreen');
+            const glassMemories = document.getElementById('glassMemoriesScreen');
+            const glassWebhook = document.getElementById('glassWebhookScreen');
+
+            balloonsContainer.classList.remove('active');
+            glassMsg.classList.remove('active');
+            glassMemories.classList.remove('active');
+            glassWebhook.classList.remove('active');
+
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+
+            if (stepNum !== 5 && wasBgMusicPlaying) {
+                bgMusic.play();
+                bgMusicText.innerText = "موسيقى الخلفية: شغال 🎵";
+                wasBgMusicPlaying = false;
+            }
+
+            if (stepNum === 3) {
+                mainCard.classList.add('hidden-card');
+                initFullscreenBalloons();
+            } else if (stepNum === 4) {
+                mainCard.classList.add('hidden-card');
+                glassMsg.classList.add('active');
+            } else if (stepNum === 5) {
+                mainCard.classList.add('hidden-card');
+                glassMemories.classList.add('active');
+                showMemory(0);
+            } else {
+                mainCard.classList.remove('hidden-card');
+                if (stepNum === 2) {
+                    document.getElementById('step-2').classList.add('active');
+                } else if (stepNum === 6) {
+                    document.getElementById('step-6').classList.add('active');
+                }
+            }
+        }
+
+        function openWebhookScreen() {
+            luxuryCard.classList.add('hidden-card');
+            glassWebhookScreen.classList.add('active');
+        }
+
+        function closeWebhookScreen() {
+            glassWebhookScreen.classList.remove('active');
+            luxuryCard.classList.remove('hidden-card');
+        }
+
+        document.getElementById('webhookForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const messageBox = document.getElementById('messageContent');
+            const statusDiv = document.getElementById('webhookStatus');
+            const sendBtn = document.getElementById('sendWebhookBtn');
+            const text = messageBox.value.trim();
+
+            if (!text) return;
+
+            sendBtn.disabled = true;
+            sendBtn.innerText = "جاري الإرسال...";
+            statusDiv.style.color = "#b892ff";
+            statusDiv.innerText = "جاري إرسال الرسالة...";
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: `📩 **رسالة جديدة وصلت من الموقع:**\n> ${text}`
+                    })
+                });
+
+                if (response.ok || response.status === 204) {
+                    statusDiv.style.color = "#4cd137";
+                    statusDiv.innerText = "تم إرسال رسالتك بنجاح! 💜";
+                    messageBox.value = "";
+                } else {
+                    throw new Error('فشل الإرسال');
+                }
+            } catch (error) {
+                statusDiv.style.color = "#ff6b6b";
+                statusDiv.innerText = "صار فيه خطأ، تأكد من رابط الويب هوك.";
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerText = "ارسال الى الياس.. 🚀";
+            }
+        });
+
+        function checkCode() {
+            const val = document.getElementById('passcode').value;
+            const err = document.getElementById('error-msg');
+            if (val === secretCode) {
+                err.innerHTML = "";
+                const popup = document.getElementById('congrats-popup');
+                document.getElementById('popup-text').innerText = "عاشت ايدج خلي نفرقع شوي بالونات 😊";
+                popup.classList.add('show');
+                setTimeout(() => {
+                    popup.classList.remove('show');
+                    setTimeout(() => { goToStep(3); }, 400);
+                }, 2000);
+            } else {
+                err.innerHTML = "السمكه ذاكرتها احسن اخخ منج";
+            }
+        }
+
+        function initFullscreenBalloons() {
+            const container = document.getElementById('fullscreen-balloons-container');
+            container.innerHTML = '';
+            poppedCount = 0;
+            container.classList.add('active');
+
+            for (let i = 1; i <= totalBalloons; i++) {
+                const b = document.createElement('div');
+                b.className = 'real-balloon';
+                b.innerHTML = i; 
+
+                const randomX = Math.random() * (window.innerWidth - 60);
+                const randomY = Math.random() * (window.innerHeight - 100) + 30;
+
+                b.style.left = randomX + 'px';
+                b.style.top = randomY + 'px';
+
+                const hue = 270 + Math.floor(Math.random() * 30);
+                b.style.background = `radial-gradient(circle at 30% 30%, hsl(${hue}, 70%, 65%), hsl(${hue}, 80%, 30%))`;
+                b.style.animationDuration = (3 + Math.random() * 2) + 's';
+                b.style.animationDelay = (Math.random() * 2) + 's';
+
+                b.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (!b.classList.contains('popped')) {
+                        b.classList.add('popped');
+                        poppedCount++;
+                        playPopSound();
+
+                        confetti({
+                            particleCount: 15,
+                            spread: 50,
+                            origin: { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight }
+                        });
+
+                        if (poppedCount === totalBalloons) {
+                            container.classList.remove('active');
+                            const popup = document.getElementById('congrats-popup');
+                            document.getElementById('popup-text').innerText = "شاطره !!";
+                            popup.classList.add('show');
+                            confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+
+                            setTimeout(() => {
+                                popup.classList.remove('show');
+                                setTimeout(() => { goToStep(4); }, 400);
+                            }, 2000);
+                        }
+                    }
+                });
+                container.appendChild(b);
+            }
+        }
+
+        const memories = [
+            { text: "اول رساله بيننا", img: "image.png" },
+            { type: "music", text: "المفروض متذكرتها 🤭", audioSrc: "song.mp3", coverImg: "cover.jpg", songTitle: "Again (feat. XXXTENTACION)", artist: "Noah Cyrus, XXXTENTACION" },
+            { text: "يوم ختمنا باكرومز 💫", img: "backrooms.png" },
+            { text: "تتذكرين هالحلو ؟ اخخخ ايام الايفات والفطس", img: "lifeguy.png" }
+        ];
+
+        let currentMemoryIndex = 0;
+        let currentAudio = null;
+
+        function showMemory(index) {
+            const displayArea = document.getElementById('memoryDisplayArea');
+            const textEl = document.getElementById('activeMemoryText');
+            const btn = document.getElementById('next-memory-btn');
+
+            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+
+            if (index < memories.length) {
+                const memory = memories[index];
+                textEl.classList.remove('loaded');
+                setTimeout(() => { textEl.innerHTML = memory.text; textEl.classList.add('loaded'); }, 150);
+
+                if (memory.type === "music") {
+                    displayArea.innerHTML = `
+                        <div class="music-player-card" style="height: 100%; display: flex; justify-content: center;">
+                            <div class="player-info">
+                                <img src="${memory.coverImg}" class="player-cover" alt="Cover">
+                                <div class="player-details">
+                                    <span class="player-title">${memory.songTitle}</span>
+                                    <span class="player-artist">${memory.artist}</span>
+                                </div>
+                            </div>
+                            <div class="player-controls" style="margin-top: 10px;">
+                                <button type="button" class="play-pause-btn" id="playBtn" onclick="togglePlay('${memory.audioSrc}')">▶</button>
+                                <div class="progress-container" id="progressContainer" onclick="seekAudio(event)">
+                                    <div class="progress-bar" id="progressBar"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <audio id="memoryAudio" src="${memory.audioSrc}"></audio>
+                    `;
+                } else {
+                    displayArea.innerHTML = `
+                        <img id="activeMemoryImg" src="" class="memory-img" alt="ذكرى" onclick="openLightbox('${memory.img}')">
+                        <div class="zoom-hint-btn">🔍 اضغط للتكبير</div>
+                    `;
+                    const imgEl = document.getElementById('activeMemoryImg');
+                    imgEl.classList.remove('loaded');
+                    setTimeout(() => { imgEl.src = memory.img; imgEl.classList.add('loaded'); }, 150);
+                }
+                btn.innerHTML = (index === memories.length - 1) ? "التالي...." : "الذكرى التالية ➡️";
+            } else {
+                goToStep(6);
+            }
+        }
+
+        function nextMemory() { currentMemoryIndex++; showMemory(currentMemoryIndex); }
+
+        function openLightbox(imgSrc) {
+            const lightbox = document.getElementById('imageLightbox');
+            const lightboxImg = document.getElementById('lightboxImg');
+            lightboxImg.src = imgSrc;
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('imageLightbox');
+            lightbox.classList.remove('active');
+        }
+
+        function togglePlay(src) {
+            let audio = document.getElementById('memoryAudio');
+            let playBtn = document.getElementById('playBtn');
+            let progressBar = document.getElementById('progressBar');
+            if (!audio) return;
+
+            if (audio.paused) {
+                if (!bgMusic.paused) {
+                    bgMusic.pause();
+                    wasBgMusicPlaying = true;
+                    bgMusicText.innerText = "موسيقى الخلفية: متوقف (مؤقتاً)";
+                }
+
+                audio.play();
+                playBtn.innerHTML = "❚❚";
+                currentAudio = audio;
+                audio.ontimeupdate = () => { progressBar.style.width = ((audio.currentTime / audio.duration) * 100) + '%'; };
+                audio.onended = () => { 
+                    playBtn.innerHTML = "▶"; 
+                    progressBar.style.width = '0%'; 
+                    if (wasBgMusicPlaying) {
+                        bgMusic.play();
+                        bgMusicText.innerText = "موسيقى الخلفية: شغال 🎵";
+                        wasBgMusicPlaying = false;
+                    }
+                };
+            } else { 
+                audio.pause(); 
+                playBtn.innerHTML = "▶"; 
+                if (wasBgMusicPlaying) {
+                    bgMusic.play();
+                    bgMusicText.innerText = "موسيقى الخلفية: شغال 🎵";
+                    wasBgMusicPlaying = false;
+                }
+            }
+        }
+
+        function seekAudio(event) {
+            let audio = document.getElementById('memoryAudio');
+            let container = document.getElementById('progressContainer');
+            if (!audio || !audio.duration) return;
+            audio.currentTime = (event.offsetX / container.clientWidth) * audio.duration;
+        }
+
+        function triggerMegaConfetti() { confetti({ particleCount: 200, spread: 130, origin: { y: 0.6 } }); }
+    </script>
+</body>
+</html>
